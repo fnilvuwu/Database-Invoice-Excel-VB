@@ -1,0 +1,326 @@
+CODING FORM INVOICE | EXCEL & VBA TUTORIAL
+================================================
+Option Explicit
+Private Sub CMDADD_Click()
+Dim DBINVOICE As Object
+Set DBINVOICE = Sheet3.Range("B23").End(xlUp)
+If Me.TXTINVOICE.value = "" _
+Or Me.TXTTANGGAL.value = "" _
+Or Me.TXTDIKIRIM.value = "" _
+Or Me.TXTALAMAT.value = "" _
+Or Me.TXTNAMABARANG.value = "" _
+Or Me.TXTQTY.value = "" _
+Or Me.TXTHARGA.value = "" _
+Or Me.TXTTOTAL.value = "" Then
+
+Call MsgBox("Harap isi data barang dengan lengkap", vbInformation, "Data Barang")
+Else
+DBINVOICE.Offset(1, 0).value = Me.TXTNAMABARANG.value
+DBINVOICE.Offset(1, 1).value = Me.TXTSATUAN.value
+On Error Resume Next
+DBINVOICE.Offset(1, 2).value = CDec(Me.TXTHARGA.value)
+DBINVOICE.Offset(1, 3).value = Me.TXTQTY.value
+DBINVOICE.Offset(1, 4).value = CDec(Me.TXTTOTAL.value)
+Call MsgBox("Data barang telah disimpan", vbInformation, "Data Barang")
+Call AmbilData
+Me.TXTSUBTOTAL.value = Sheet3.Range("F26").value
+Me.TXTPAJAK.value = Sheet3.Range("F27").value
+Me.TXTTOTALHARGA.value = Sheet3.Range("F28").value
+
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSATUAN.value = ""
+End If
+End Sub
+
+Private Sub CMDBARU_Click()
+Dim X As Long
+X = Sheet3.Range("H10").value + 1
+Sheet3.Range("H10").value = X
+
+Select Case MsgBox("Anda akan membuat Invoice baru" _
+& vbCrLf & "Apakah anda yakin?" _
+, vbYesNo Or vbQuestion Or vbDefaultButton1, "Invoice Baru")
+Case vbNo
+Exit Sub
+Case vbYes
+End Select
+Me.TXTINVOICE.value = ""
+Me.TXTTANGGAL.value = ""
+Me.TXTDIKIRIM.value = ""
+Me.TXTALAMAT.value = ""
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSUBTOTAL.value = ""
+Me.TXTPAJAK.value = ""
+Me.TXTTOTALHARGA.value = ""
+Me.CMDEXPORT.Enabled = True
+Me.CMDBARU.Enabled = False
+Sheet3.Range("B13:F23").value = ""
+If Sheet3.Range("I10").value = 1 Then
+Me.TXTINVOICE.value = "INV-100000" & X
+End If
+If Sheet3.Range("I10").value = 2 Then
+Me.TXTINVOICE.value = "INV-10000" & X
+End If
+If Sheet3.Range("I10").value = 3 Then
+Me.TXTINVOICE.value = "INV-1000" & X
+End If
+If Sheet3.Range("I10").value = 4 Then
+Me.TXTINVOICE.value = "INV-100" & X
+End If
+If Sheet3.Range("I10").value = 5 Then
+Me.TXTINVOICE.value = "INV-10" & X
+End If
+Me.TXTINVOICE.Enabled = False
+End Sub
+
+Private Sub CMDCARI_Click()
+FORMBARANG.Show
+End Sub
+
+Private Sub CMDCLEAR_Click()
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSATUAN.value = ""
+Me.TABELINVOICE.value = ""
+Me.CMDADD.Enabled = True
+Me.CMDCARI.Enabled = True
+End Sub
+
+Private Sub CMDCLEARALL_Click()
+Me.TXTINVOICE.value = ""
+Me.TXTTANGGAL.value = ""
+Me.TXTDIKIRIM.value = ""
+Me.TXTALAMAT.value = ""
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSUBTOTAL.value = ""
+Me.TXTPAJAK.value = ""
+Me.TXTTOTALHARGA.value = ""
+Me.CMDEXPORT.Enabled = False
+Me.CMDBARU.Enabled = True
+Sheet3.Range("B13:F23").value = ""
+
+End Sub
+
+Private Sub CMDEXPORT_Click()
+Application.ScreenUpdating = False
+Dim InvoiceRng As Range
+Dim NamaFile As String
+Dim DBINVOICE As Object
+Set DBINVOICE = Sheet1.Range("A1000000").End(xlUp)
+
+If Me.TXTINVOICE.value = "" _
+Or Me.TXTTANGGAL.value = "" _
+Or Me.TXTDIKIRIM.value = "" _
+Or Me.TXTALAMAT.value = "" Then
+Call MsgBox("Harap isi terlebih dahulu data invoice", vbInformation, "Data Invoice")
+Else
+Set InvoiceRng = Sheet3.Range("B1:F42")
+NamaFile = "Invoice_" & Me.TXTINVOICE.value & "_" & Format(Now(), "DDMMYYYY_HHMMSS") & ".Pdf"
+
+DBINVOICE.Offset(1, 0).value = "=ROW()-ROW($A$5)"
+DBINVOICE.Offset(1, 1).value = Me.TXTINVOICE.value
+DBINVOICE.Offset(1, 2).value = Me.TXTDIKIRIM.value
+DBINVOICE.Offset(1, 3).value = Me.TXTALAMAT.value
+DBINVOICE.Offset(1, 4).value = Format(CDate(Me.TXTTANGGAL.value), "MM/DD/YYYY")
+DBINVOICE.Offset(1, 5).value = FORMUTAMA.TXTFOLDER.value & NamaFile
+
+NamaFile = FORMUTAMA.TXTFOLDER.value & NamaFile
+InvoiceRng.ExportAsFixedFormat _
+Type:=xlTypePDF, _
+Filename:=NamaFile, _
+Quality:=xlQualityStandard, _
+IncludeDocProperties:=True, _
+IgnorePrintAreas:=True, _
+OpenafterPublish:=True
+Call AmbilInvoice
+Call MsgBox("Invoice telah di export ke Pdf", vbInformation, "Export Invoice")
+Me.CMDBARU.Enabled = True
+Me.CMDEXPORT.Enabled = True
+End If
+End Sub
+
+Private Sub CMDHAPUS_Click()
+Dim DBINVOICE As Object
+Set DBINVOICE = Sheet3.Range("B13:B23").Find(What:=Me.TXTNAMABARANG.value, LookIn:=xlValues)
+If Me.TXTNAMABARANG.value = "" Then
+Call MsgBox("Harap pilih nama barang terlebih dahulu", vbInformation, "Nama Barang")
+Else
+Select Case MsgBox("Anda akan menghapus barang" _
+& vbCrLf & "Apakah anda yakin?" _
+, vbYesNo Or vbQuestion Or vbDefaultButton1, "Hapus Barang")
+Case vbNo
+Exit Sub
+Case vbYes
+End Select
+
+DBINVOICE.Offset(0, 0).value = ""
+DBINVOICE.Offset(0, 1).value = ""
+DBINVOICE.Offset(0, 2).value = ""
+DBINVOICE.Offset(0, 3).value = ""
+DBINVOICE.Offset(0, 4).value = ""
+Call MsgBox("Data barang telah dihapus", vbInformation, "Data Barang")
+Call UrutData
+Call AmbilData
+Me.TXTSUBTOTAL.value = Sheet3.Range("F26").value
+Me.TXTPAJAK.value = Sheet3.Range("F27").value
+Me.TXTTOTALHARGA.value = Sheet3.Range("F28").value
+Me.CMDADD.Enabled = True
+Me.CMDCARI.Enabled = True
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSATUAN.value = ""
+Me.TABELINVOICE.value = ""
+End If
+End Sub
+
+Private Sub CMDTGL_Click()
+Me.TXTTGL.value = 1
+Call AdvancedCalendar
+End Sub
+
+Private Sub CMDUPDATE_Click()
+Dim DBINVOICE As Object
+Set DBINVOICE = Sheet3.Range("B13:B23").Find(What:=Me.TXTNAMABARANG.value, LookIn:=xlValues)
+If Me.TXTNAMABARANG.value = "" Then
+Call MsgBox("Harap pilih nama barang terlebih dahulu", vbInformation, "Nama Barang")
+Else
+On Error Resume Next
+DBINVOICE.Offset(0, 2).value = CDec(Me.TXTHARGA.value)
+DBINVOICE.Offset(0, 3).value = Me.TXTQTY.value
+DBINVOICE.Offset(0, 4).value = CDec(Me.TXTTOTAL.value)
+Call MsgBox("Data barang telah diubah", vbInformation, "Data Barang")
+Call AmbilData
+Me.TXTSUBTOTAL.value = Sheet3.Range("F26").value
+Me.TXTPAJAK.value = Sheet3.Range("F27").value
+Me.TXTTOTALHARGA.value = Sheet3.Range("F28").value
+Me.CMDADD.Enabled = True
+Me.CMDCARI.Enabled = True
+Me.TXTNAMABARANG.value = ""
+Me.TXTQTY.value = ""
+Me.TXTHARGA.value = ""
+Me.TXTTOTAL.value = ""
+Me.TXTSATUAN.value = ""
+Me.TABELINVOICE.value = ""
+End If
+
+End Sub
+
+Private Sub TABELINVOICE_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+On Error GoTo EXCELVBA
+Dim SumberData, CellAktif As Long
+
+Me.TXTNAMABARANG.value = Me.TABELINVOICE.value
+Me.TXTSATUAN.value = Me.TABELINVOICE.Column(1)
+Me.TXTQTY.value = Me.TABELINVOICE.Column(3)
+Me.TXTHARGA.value = Me.TABELINVOICE.Column(2)
+Me.TXTTOTAL.value = Me.TABELINVOICE.Column(4)
+Me.CMDADD.Enabled = False
+Me.CMDCARI.Enabled = False
+Sheet3.Select
+SumberData = Sheets("INVOICE").Cells(Rows.Count, "B").End(xlUp).Row
+Sheets("INVOICE").Range("B13:B" & SumberData).Find(What:=Me.TXTNAMABARANG.value, LookIn:=xlValues, LookAt:=xlWhole).Activate
+CellAktif = ActiveCell.Row
+Sheet3.Select
+Exit Sub
+EXCELVBA:
+Call MsgBox("Harap klik 2x pada data yang tersedia", vbInformation, "Pilih Data")
+
+End Sub
+
+Private Sub TXTALAMAT_Change()
+Sheet3.Range("B9").value = Me.TXTALAMAT.value
+End Sub
+
+Private Sub TXTDIKIRIM_Change()
+Sheet3.Range("B8").value = Me.TXTDIKIRIM.value
+End Sub
+
+Private Sub TXTHARGA_Change()
+On Error Resume Next
+Me.TXTHARGA.value = Format(Me.TXTHARGA, "#,###")
+End Sub
+
+Private Sub TXTINVOICE_Change()
+Sheet3.Range("E10").value = Me.TXTINVOICE.value
+End Sub
+
+Private Sub TXTPAJAK_Change()
+On Error Resume Next
+Me.TXTPAJAK.value = Format(Me.TXTPAJAK, "#,###")
+End Sub
+
+Private Sub TXTQTY_Change()
+Dim A As Currency
+Dim B As Integer
+On Error Resume Next
+A = Me.TXTHARGA.value
+B = Me.TXTQTY.value
+
+Me.TXTTOTAL.value = A * B
+End Sub
+
+Private Sub TXTSUBTOTAL_Change()
+On Error Resume Next
+Me.TXTSUBTOTAL.value = Format(Me.TXTSUBTOTAL, "#,###")
+End Sub
+
+Private Sub TXTTANGGAL_Change()
+Sheet3.Range("E8").value = Me.TXTTANGGAL.value
+End Sub
+Private Sub AmbilData()
+Dim DBBARANG As Long
+Dim iRow As Long
+iRow = Sheet3.Range("B" & Rows.Count).End(xlUp).Row
+DBBARANG = Application.WorksheetFunction.CountA(Sheet3.Range("B13:B23"))
+If DBBARANG = 0 Then
+FORMINVOICE.TABELINVOICE.RowSource = ""
+Else
+FORMINVOICE.TABELINVOICE.RowSource = "INVOICE!B13:F" & iRow
+End If
+End Sub
+Private Sub AmbilInvoice()
+Dim DBINVOICE As Long
+Dim iRow As Long
+iRow = Sheet1.Range("A" & Rows.Count).End(xlUp).Row
+DBINVOICE = Application.WorksheetFunction.CountA(Sheet1.Range("A6:A1000000"))
+If DBINVOICE = 0 Then
+FORMUTAMA.TABELINVOICE.RowSource = ""
+Else
+FORMUTAMA.TABELINVOICE.RowSource = "DATAINVOICE!A6:F" & iRow
+End If
+End Sub
+Private Sub TXTTOTAL_Change()
+On Error Resume Next
+Me.TXTTOTAL.value = Format(Me.TXTTOTAL, "#,###")
+End Sub
+
+Private Sub TXTTOTALHARGA_Change()
+On Error Resume Next
+Me.TXTTOTALHARGA.value = Format(Me.TXTTOTALHARGA, "#,###")
+End Sub
+
+Private Sub UserForm_Initialize()
+Call AmbilData
+Me.CMDEXPORT.Enabled = False
+Me.TXTSUBTOTAL.value = Sheet3.Range("F26").value
+Me.TXTPAJAK.value = Sheet3.Range("F27").value
+Me.TXTTOTALHARGA.value = Sheet3.Range("F28").value
+Me.TXTINVOICE.value = Sheet3.Range("E10").value
+Me.TXTTANGGAL.value = Sheet3.Range("E8").value
+Me.TXTDIKIRIM.value = Sheet3.Range("B8").value
+Me.TXTALAMAT.value = Sheet3.Range("B9").value
+
+End Sub

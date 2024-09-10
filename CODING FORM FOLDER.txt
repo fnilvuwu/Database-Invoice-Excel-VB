@@ -1,0 +1,29 @@
+CODING FORM FOLDER | EXCEL & VBA TUTORIAL
+================================================
+Option Explicit
+
+Private Sub CMDCANCEL_Click()
+Sheet1.Range("F3").value = ""
+Me.TXTFOLDER.value = ""
+FORMUTAMA.TXTFOLDER.value = ""
+End Sub
+
+Private Sub CMDSET_Click()
+Dim PilihFolder As String
+With Application.FileDialog(msoFileDialogFolderPicker)
+.Title = "Select Folder"
+.ButtonName = "Confirm"
+If .Show = -1 Then
+PilihFolder = .SelectedItems(1)
+Call MsgBox(PilihFolder)
+Sheet1.Range("F3").value = PilihFolder & "\"
+Me.TXTFOLDER.value = Sheet1.Range("F3").value
+FORMUTAMA.TXTFOLDER.value = Sheet1.Range("F3").value
+Else
+End If
+End With
+End Sub
+Private Sub UserForm_Initialize()
+Me.TXTFOLDER.value = Sheet1.Range("F3").value
+
+End Sub

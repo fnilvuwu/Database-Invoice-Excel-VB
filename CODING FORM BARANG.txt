@@ -1,0 +1,64 @@
+CODING FORM BARANG | EXCEL & VBA TUTORIAL
+================================================
+
+Option Explicit
+Private Sub TABELBARANG_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+On Error GoTo EXCELVBA
+Dim DBBARANG As Object
+Set DBBARANG = Sheet2.Range("B6:B1000000").Find(What:=Me.TABELBARANG.value, LookIn:=xlValues)
+
+With FORMINVOICE
+.TXTNAMABARANG.value = Me.TABELBARANG.Column(1)
+.TXTSATUAN.value = DBBARANG.Offset(0, 2).value
+.TXTHARGA.value = DBBARANG.Offset(0, 3).value
+.TXTQTY.SetFocus
+End With
+Unload Me
+
+Exit Sub
+EXCELVBA:
+Call MsgBox("Data barang tidak ditemukan di tabel barang", vbInformation, "Cari Barang")
+
+End Sub
+Private Sub AmbilData()
+Dim DBBARANG As Long
+Dim iRow As Long
+iRow = Sheet2.Range("A" & Rows.Count).End(xlUp).Row
+DBBARANG = Application.WorksheetFunction.CountA(Sheet2.Range("A6:A1000000"))
+If DBBARANG = 0 Then
+FORMBARANG.TABELBARANG.RowSource = ""
+Else
+FORMBARANG.TABELBARANG.RowSource = "DATABARANG!B6:C" & iRow
+End If
+End Sub
+
+Private Sub TXTCARI_Change()
+On Error GoTo EXCELVBA
+Dim CARI_DATA As Object
+Dim iRow As Long
+Set CARI_DATA = Sheet2
+Sheet4.Range("G5").value = "Nama Barang"
+Sheet4.Range("G6").value = "*" & Me.TXTCARI.value & "*"
+CARI_DATA.Range("A5").CurrentRegion.AdvancedFilter Action:=xlFilterCopy, CriteriaRange:= _
+Sheet4.Range("G5:G6"), CopyToRange:=Sheet4.Range("A5:E5"), Unique:=False
+Call HasilCari
+Exit Sub
+EXCELVBA:
+Call MsgBox("Maaf Data tidak ditemukan", vbInformation, "Cari Data")
+
+End Sub
+Private Sub HasilCari()
+Dim DBBARANG As Long
+Dim iRow As Long
+iRow = Sheet4.Range("A" & Rows.Count).End(xlUp).Row
+DBBARANG = Application.WorksheetFunction.CountA(Sheet4.Range("A6:A1000000"))
+If DBBARANG = 0 Then
+FORMBARANG.TABELBARANG.RowSource = ""
+Else
+FORMBARANG.TABELBARANG.RowSource = "CARIBARANG!B6:C" & iRow
+End If
+End Sub
+
+Private Sub UserForm_Initialize()
+Call AmbilData
+End Sub

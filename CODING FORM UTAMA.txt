@@ -1,0 +1,231 @@
+CODING FORM UTAMA | EXCEL & VBA TUTORIAL
+================================================
+
+Private Sub CMDADD_Click()
+Dim DBBARANG As Object
+Set DBBARANG = Sheet2.Range("A1000000").End(xlUp)
+If Me.TXTBARCODE.value = "" _
+Or Me.TXTNAMA.value = "" _
+Or Me.CBSATUAN.value = "" _
+Or Me.TXTHARGA.value = "" Then
+Call MsgBox("Harap isi data barang dengan lengkap", vbInformation, "Tambah data")
+Else
+DBBARANG.Offset(1, 0).value = "=ROW()-ROW($A$5)"
+DBBARANG.Offset(1, 1).value = Me.TXTBARCODE.value
+DBBARANG.Offset(1, 2).value = Me.TXTNAMA.value
+DBBARANG.Offset(1, 3).value = Me.CBSATUAN.value
+On Error Resume Next
+DBBARANG.Offset(1, 4).value = CDec(Me.TXTHARGA.value)
+
+Call MsgBox("Data barang telah disimpan", vbInformation, "Data Barang")
+Call AmbilData
+Me.TXTBARCODE.value = ""
+Me.TXTNAMA.value = ""
+Me.CBSATUAN.value = ""
+Me.TXTHARGA.value = ""
+End If
+
+End Sub
+Private Sub AmbilData()
+Dim DBBARANG As Long
+Dim iRow As Long
+iRow = Sheet2.Range("A" & Rows.Count).End(xlUp).Row
+DBBARANG = Application.WorksheetFunction.CountA(Sheet2.Range("A6:A1000000"))
+If DBBARANG = 0 Then
+FORMUTAMA.TABELBARANG.RowSource = ""
+Else
+FORMUTAMA.TABELBARANG.RowSource = "DATABARANG!A6:E" & iRow
+End If
+End Sub
+
+Private Sub CMDCANCEL_Click()
+Me.TABELINVOICE.value = ""
+Me.TXTFILE.value = ""
+End Sub
+
+Private Sub CMDDELETE_Click()
+If Me.TXTNOMOR.value = "" Then
+Call MsgBox("Pilih data pada tabel data", vbInformation, "Hapus Data")
+Else
+'Membuat pesan konfirmasi hapus data
+Select Case MsgBox("Anda akan menghapus data" _
+& vbCrLf & "Apakah anda yakin?" _
+, vbYesNo Or vbQuestion Or vbDefaultButton1, "Hapus data")
+Case vbNo
+Exit Sub
+Case vbYes
+End Select
+Sheet2.Select
+Selection.EntireRow.Delete
+Call MsgBox("Data berhasil dihapus", vbInformation, "Hapus Data")
+Call AmbilData
+Me.TABELBARANG.value = ""
+Me.TXTNOMOR.value = ""
+Me.TXTBARCODE.value = ""
+Me.TXTNAMA.value = ""
+Me.CBSATUAN.value = ""
+Me.TXTHARGA.value = ""
+Me.CMDADD.Enabled = True
+End If
+
+End Sub
+
+Private Sub CMDFOLDER_Click()
+FORMFOLDER.Show
+End Sub
+
+Private Sub CMDINVOICE_Click()
+If Me.TXTFOLDER.value = "" Then
+Call MsgBox("Folder penyimpanan file Invoice belum di atur, harap atur lewat menu Folder", vbInformation, "Folder Invoice")
+Else
+FORMINVOICE.Show
+End If
+End Sub
+
+Private Sub CMDKELUAR_Click()
+Select Case MsgBox("Anda akan keluar dari Aplikasi" _
+& vbCrLf & "Apakah anda yakin?" _
+, vbYesNo Or vbQuestion Or vbDefaultButton1, "Keluar")
+Case vbNo
+Exit Sub
+Case vbYes
+End Select
+Application.Visible = True
+Unload Me
+ThisWorkbook.Save
+ThisWorkbook.Close
+
+End Sub
+
+Private Sub CMDOPEN_Click()
+If Me.TXTFILE.value = "" Then
+Call MsgBox("Klik 2x pada data di atas untuk membuka file Invoice", vbInformation, "Buka Invoice")
+Else
+On Error Resume Next
+ActiveWorkbook.FollowHyperlink (Me.TXTFILE)
+End If
+
+End Sub
+
+Private Sub CMDOPENSHEET_Click()
+Select Case MsgBox("Anda akan membuka database sheet" _
+& vbCrLf & "Apakah anda yakin?" _
+, vbYesNo Or vbQuestion Or vbDefaultButton1, "Buka Database")
+Case vbNo
+Exit Sub
+Case vbYes
+End Select
+Application.Visible = True
+Unload Me
+Sheet1.Select
+End Sub
+
+Private Sub CMDRESET_Click()
+Me.TABELBARANG.value = ""
+Me.TXTNOMOR.value = ""
+Me.TXTBARCODE.value = ""
+Me.TXTNAMA.value = ""
+Me.CBSATUAN.value = ""
+Me.TXTHARGA.value = ""
+Me.CMDADD.Enabled = True
+Call AmbilData
+End Sub
+
+Private Sub CMDSIMPAN_Click()
+ThisWorkbook.Save
+End Sub
+
+Private Sub CMDUPDATE_Click()
+Dim DBBARANG As Object
+Set DBBARANG = Sheet2.Range("A6:A1000000").Find(What:=Me.TXTNOMOR.value, LookIn:=xlValues)
+
+If Me.TXTNOMOR.value = "" Then
+Call MsgBox("Harap pilih data pada tabel data", vbInformation, "Update Data")
+Else
+DBBARANG.Offset(0, 1).value = Me.TXTBARCODE.value
+DBBARANG.Offset(0, 2).value = Me.TXTNAMA.value
+DBBARANG.Offset(0, 3).value = Me.CBSATUAN.value
+On Error Resume Next
+DBBARANG.Offset(0, 4).value = CDec(Me.TXTHARGA.value)
+
+Call MsgBox("Data barang telah disimpan", vbInformation, "Data Barang")
+Call AmbilData
+Me.TABELBARANG.value = ""
+Me.TXTNOMOR.value = ""
+Me.TXTBARCODE.value = ""
+Me.TXTNAMA.value = ""
+Me.CBSATUAN.value = ""
+Me.TXTHARGA.value = ""
+Me.CMDADD.Enabled = True
+End If
+
+End Sub
+
+Private Sub Label6_Click()
+
+End Sub
+
+Private Sub TABELBARANG_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+On Error GoTo EXCELVBA
+Dim SumberData, CellAktif As Long
+
+Me.TXTNOMOR.value = Me.TABELBARANG.value
+Me.TXTBARCODE.value = Me.TABELBARANG.Column(1)
+Me.TXTNAMA.value = Me.TABELBARANG.Column(2)
+Me.CBSATUAN.value = Me.TABELBARANG.Column(3)
+Me.TXTHARGA.value = Me.TABELBARANG.Column(4)
+
+Me.CMDADD.Enabled = False
+Sheet2.Select
+SumberData = Sheets("DATABARANG").Cells(Rows.Count, "A").End(xlUp).Row
+Sheets("DATABARANG").Range("A6:A" & SumberData).Find(What:=Me.TXTNOMOR.value, LookIn:=xlValues, LookAt:=xlWhole).Activate
+CellAktif = ActiveCell.Row
+Sheet2.Select
+Exit Sub
+EXCELVBA:
+Call MsgBox("Harap klik 2x pada data yang tersedia", vbInformation, "Pilih Data")
+End Sub
+
+Private Sub TABELINVOICE_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+On Error GoTo EXCELVBA
+Me.TXTFILE.value = Me.TABELINVOICE.Column(5)
+Exit Sub
+EXCELVBA:
+Call MsgBox("Harap pilih data pada tabel data", vbInformation, "Pilih Data")
+
+End Sub
+
+Private Sub TXTHARGA_Change()
+On Error Resume Next
+Me.TXTHARGA.value = Format(Me.TXTHARGA.value, "#,###")
+End Sub
+Private Sub AmbilInvoice()
+Dim DBINVOICE As Long
+Dim iRow As Long
+iRow = Sheet1.Range("A" & Rows.Count).End(xlUp).Row
+DBINVOICE = Application.WorksheetFunction.CountA(Sheet1.Range("A6:A1000000"))
+If DBINVOICE = 0 Then
+FORMUTAMA.TABELINVOICE.RowSource = ""
+Else
+FORMUTAMA.TABELINVOICE.RowSource = "DATAINVOICE!A6:F" & iRow
+End If
+End Sub
+Private Sub UserForm_Initialize()
+Call AmbilData
+Call AmbilInvoice
+FORMUTAMA.TXTFOLDER.value = Sheet1.Range("F3").value
+With CBSATUAN
+.AddItem "Pcs"
+.AddItem "Box"
+.AddItem "Lusin"
+.AddItem "Pack"
+End With
+
+End Sub
+
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+If CloseMode = 0 Then
+Cancel = True
+End If
+
+End Sub

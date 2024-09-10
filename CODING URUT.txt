@@ -1,0 +1,8 @@
+CODING FORM UTAMA | EXCEL & VBA TUTORIAL
+================================================
+Sub UrutData()
+Application.ScreenUpdating = False
+Sheet3.Select
+Sheet3.Range("B12:F23").Sort KEY1:=Range("B12"), Order1:=xlAscending, Header:=xlYes
+Sheet3.Select
+End Sub
